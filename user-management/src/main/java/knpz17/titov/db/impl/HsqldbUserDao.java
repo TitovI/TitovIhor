@@ -1,6 +1,7 @@
-package knpz17.titov.db;
+package knpz17.titov.db.impl;
 
 import knpz17.titov.User;
+import knpz17.titov.db.UserDao;
 import knpz17.titov.exception.db.DatabaseException;
 
 import java.util.Collection;

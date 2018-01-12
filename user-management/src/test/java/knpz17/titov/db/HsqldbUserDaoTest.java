@@ -1,11 +1,11 @@
 package knpz17.titov.db;
 
 import knpz17.titov.User;
+import knpz17.titov.db.impl.HsqldbUserDao;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -16,8 +16,6 @@ public class HsqldbUserDaoTest {
     @Before
     public void setUp() throws Exception {
         userDao = new HsqldbUserDao();
-
-
     }
 
     @Test
