@@ -9,16 +9,23 @@ import java.sql.SQLException;
 
 public class ConnectionFactoryImpl implements ConnectionFactory {
 
+    private String driver;
+    private String url;
+    private String user;
+    private String password;
+
+    public ConnectionFactoryImpl(String driver, String url, String user, String pass) {
+        this.driver = driver;
+        this.url = url;
+        this.user = user;
+        this.password = pass;
+    }
+
     @Override
     public Connection getConnection() throws DatabaseException {
-        String driverName = "org.hsqldb.jdbcDriver";
-        String url = "jdbc:hsqldb:file:db/usermanagement";
-        String userName = "sa";
-        String password = "";
-
         try {
-            Class.forName(driverName);
-            return DriverManager.getConnection(url, userName, password);
+            Class.forName(driver);
+            return DriverManager.getConnection(url, user, password);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {

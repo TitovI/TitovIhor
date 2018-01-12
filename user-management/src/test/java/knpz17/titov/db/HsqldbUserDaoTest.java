@@ -22,7 +22,12 @@ public class HsqldbUserDaoTest extends DatabaseTestCase {
 
     @Override
     protected IDatabaseConnection getConnection() throws Exception {
-        connectionFactory = new ConnectionFactoryImpl();
+        String driver = "org.hsqldb.jdbcDriver";
+        String url = "jdbc:hsqldb:file:db/usermanagement";
+        String user = "sa";
+        String password = "";
+
+        connectionFactory = new ConnectionFactoryImpl(driver, url, user, password);
         return new DatabaseConnection(connectionFactory.getConnection());
     }
 

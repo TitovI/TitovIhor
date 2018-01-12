@@ -13,6 +13,9 @@ public class HsqldbUserDao implements UserDao {
 
     private ConnectionFactory connectionFactory;
 
+    public HsqldbUserDao() {
+    }
+
     public HsqldbUserDao(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
@@ -92,6 +95,15 @@ public class HsqldbUserDao implements UserDao {
             throw new DatabaseException(e);
         }
 
+    }
+
+    public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
+
+    @Override
+    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     private Date convert(java.util.Date utilDate) {
