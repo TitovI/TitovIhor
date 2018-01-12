@@ -17,17 +17,19 @@ import java.util.Collection;
 
 public class HsqldbUserDaoTest extends DatabaseTestCase {
 
+    private static final String DRIVER = "org.hsqldb.jdbcDriver";
+    private static final String URL = "jdbc:hsqldb:file:db/usermanagement";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "";
+
+    private static final Long TEST_ID = 1001L;
+
     private UserDao userDao;
     private ConnectionFactory connectionFactory;
 
     @Override
     protected IDatabaseConnection getConnection() throws Exception {
-        String driver = "org.hsqldb.jdbcDriver";
-        String url = "jdbc:hsqldb:file:db/usermanagement";
-        String user = "sa";
-        String password = "";
-
-        connectionFactory = new ConnectionFactoryImpl(driver, url, user, password);
+        connectionFactory = new ConnectionFactoryImpl(DRIVER, URL, USER, PASSWORD);
         return new DatabaseConnection(connectionFactory.getConnection());
     }
 
@@ -62,6 +64,14 @@ public class HsqldbUserDaoTest extends DatabaseTestCase {
 
         assertNotNull("Collection is null", allUsers);
         assertEquals("Collection size is wrong", 2, allUsers.size());
+    }
+
+    @Test
+    public void testFindById() throws Exception {
+        User user = userDao.find(TEST_ID);
+
+        assertNotNull(user);
+        assertEquals(TEST_ID, user.getId());
     }
 
     private User getTestUser() {

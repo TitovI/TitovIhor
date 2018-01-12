@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class DaoFactory {
+
     private static final String DRIVER = "connection.driver";
     private static final String URL = "connection.url";
     private static final String USER = "connection.user";
