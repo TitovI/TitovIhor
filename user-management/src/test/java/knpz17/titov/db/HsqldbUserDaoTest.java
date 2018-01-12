@@ -1,21 +1,36 @@
 package knpz17.titov.db;
 
-import junit.framework.TestCase;
 import knpz17.titov.User;
 import knpz17.titov.db.impl.ConnectionFactoryImpl;
 import knpz17.titov.db.impl.HsqldbUserDao;
-import org.junit.Before;
+import org.dbunit.DatabaseTestCase;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.XmlDataSet;
 
+import java.io.InputStream;
 import java.util.Calendar;
 
-public class HsqldbUserDaoTest extends TestCase {
+public class HsqldbUserDaoTest extends DatabaseTestCase {
 
     private UserDao userDao;
-    private ConnectionFactory connectionFactory;
+    private ConnectionFactory connectionFactory = new ConnectionFactoryImpl();
 
-    @Before
-    public void setUp() throws Exception {
-        connectionFactory = new ConnectionFactoryImpl();
+    @Override
+    protected IDatabaseConnection getConnection() throws Exception {
+        return new DatabaseConnection(connectionFactory.getConnection());
+    }
+
+    @Override
+    protected IDataSet getDataSet() throws Exception {
+        InputStream datasetResource = getClass().getClassLoader()
+                .getResourceAsStream("userdataset.xml");
+        return new XmlDataSet(datasetResource);
+    }
+
+    protected void setUp() throws Exception {
+        super.setUp();
         userDao = new HsqldbUserDao(connectionFactory);
     }
 
