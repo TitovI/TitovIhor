@@ -8,17 +8,21 @@ import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.XmlDataSet;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.Collection;
 
 public class HsqldbUserDaoTest extends DatabaseTestCase {
 
     private UserDao userDao;
-    private ConnectionFactory connectionFactory = new ConnectionFactoryImpl();
+    private ConnectionFactory connectionFactory;
 
     @Override
     protected IDatabaseConnection getConnection() throws Exception {
+        connectionFactory = new ConnectionFactoryImpl();
         return new DatabaseConnection(connectionFactory.getConnection());
     }
 
@@ -29,11 +33,13 @@ public class HsqldbUserDaoTest extends DatabaseTestCase {
         return new XmlDataSet(datasetResource);
     }
 
+    @Before
     protected void setUp() throws Exception {
         super.setUp();
         userDao = new HsqldbUserDao(connectionFactory);
     }
 
+    @Test
     public void testCreateUser() throws Exception {
         User user = getTestUser();
 
@@ -43,6 +49,14 @@ public class HsqldbUserDaoTest extends DatabaseTestCase {
 
         assertNotNull(persistedUser);
         assertNotNull(persistedUser.getId());
+    }
+
+    @Test
+    public void testFindAll() throws Exception {
+        Collection<User> allUsers = userDao.findAll();
+
+        assertNotNull("Collection is null", allUsers);
+        assertEquals("Collection size is wrong", 2, allUsers.size());
     }
 
     private User getTestUser() {
