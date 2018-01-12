@@ -65,25 +65,57 @@ public class HsqldbUserDao implements UserDao {
 
     @Override
     public void delete(User user) throws DatabaseException {
+        String DELETE_SQL = "DELETE FROM users WHERE id = ?";
+        try {
+            Connection c = connectionFactory.getConnection();
+            PreparedStatement ps = c.prepareStatement(DELETE_SQL);
+            ps.setLong(1, user.getId());
+            ps.executeUpdate();
 
+            ps.close();
+            c.close();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
     }
 
     @Override
     public User find(Long id) throws DatabaseException {
         String SELECT_BY_ID_SQL = "SELECT id, firstname, lastname, dateofbirth FROM users WHERE id = ?";
+        Connection c = null;
+        PreparedStatement ps = null;
         try {
-            Connection c = connectionFactory.getConnection();
-            PreparedStatement ps = c.prepareStatement(SELECT_BY_ID_SQL);
+            c = connectionFactory.getConnection();
+            ps = c.prepareStatement(SELECT_BY_ID_SQL);
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return extractUser(rs);
-            } else {
-                throw new UserNotFoundException(id);
+            try {
+                if (rs.next()) {
+                    return extractUser(rs);
+                } else {
+                    throw new UserNotFoundException(id);
+                }
+            } finally {
+                rs.close();
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    throw new DatabaseException(e);
+                }
+            }
+
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                    throw new DatabaseException(e);
+                }
+            }
         }
     }
 
@@ -105,10 +137,6 @@ public class HsqldbUserDao implements UserDao {
             throw new DatabaseException(e);
         }
 
-    }
-
-    public ConnectionFactory getConnectionFactory() {
-        return connectionFactory;
     }
 
     @Override
