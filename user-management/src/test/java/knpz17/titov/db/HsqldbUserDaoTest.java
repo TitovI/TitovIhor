@@ -3,6 +3,7 @@ package knpz17.titov.db;
 import knpz17.titov.User;
 import knpz17.titov.db.impl.ConnectionFactoryImpl;
 import knpz17.titov.db.impl.HsqldbUserDao;
+import knpz17.titov.exception.db.UserNotFoundException;
 import org.dbunit.DatabaseTestCase;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
@@ -10,11 +11,14 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.XmlDataSet;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Collection;
 
+@RunWith(JUnit4.class)
 public class HsqldbUserDaoTest extends DatabaseTestCase {
 
     private static final String DRIVER = "org.hsqldb.jdbcDriver";
@@ -41,7 +45,7 @@ public class HsqldbUserDaoTest extends DatabaseTestCase {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         userDao = new HsqldbUserDao(connectionFactory);
     }
@@ -72,6 +76,16 @@ public class HsqldbUserDaoTest extends DatabaseTestCase {
 
         assertNotNull(user);
         assertEquals(TEST_ID, user.getId());
+    }
+
+    @Test(expected = UserNotFoundException.class)
+    public void testDelete() throws Exception {
+        User userToDelete = new User();
+        userToDelete.setId(TEST_ID);
+
+        userDao.delete(userToDelete);
+
+        userDao.find(TEST_ID);
     }
 
     private User getTestUser() {
