@@ -11,7 +11,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 
     @Override
     public Connection getConnection() throws DatabaseException {
-        String driverName = " org.hsqldb.jdbcDriver";
+        String driverName = "org.hsqldb.jdbcDriver";
         String url = "jdbc:hsqldb:file:db/usermanagement";
         String userName = "sa";
         String password = "";
