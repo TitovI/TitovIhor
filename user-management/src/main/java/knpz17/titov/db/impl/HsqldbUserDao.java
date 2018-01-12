@@ -1,12 +1,19 @@
 package knpz17.titov.db.impl;
 
 import knpz17.titov.User;
+import knpz17.titov.db.ConnectionFactory;
 import knpz17.titov.db.UserDao;
 import knpz17.titov.exception.db.DatabaseException;
 
 import java.util.Collection;
 
 public class HsqldbUserDao implements UserDao {
+
+    private ConnectionFactory connectionFactory;
+
+    public HsqldbUserDao(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
 
     @Override
     public User create(User user) throws DatabaseException {

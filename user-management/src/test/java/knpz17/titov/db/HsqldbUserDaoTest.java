@@ -1,21 +1,25 @@
 package knpz17.titov.db;
 
 import knpz17.titov.User;
+import knpz17.titov.db.impl.ConnectionFactoryImpl;
 import knpz17.titov.db.impl.HsqldbUserDao;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Calendar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class HsqldbUserDaoTest {
 
-    UserDao userDao;
+    private UserDao userDao;
+    private ConnectionFactory connectionFactory;
 
     @Before
     public void setUp() throws Exception {
-        userDao = new HsqldbUserDao();
+        connectionFactory = new ConnectionFactoryImpl();
+        userDao = new HsqldbUserDao(connectionFactory);
     }
 
     @Test
