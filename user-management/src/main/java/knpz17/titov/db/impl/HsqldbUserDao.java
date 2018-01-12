@@ -5,10 +5,7 @@ import knpz17.titov.db.ConnectionFactory;
 import knpz17.titov.db.UserDao;
 import knpz17.titov.exception.db.DatabaseException;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Collection;
 
 public class HsqldbUserDao implements UserDao {
@@ -21,11 +18,12 @@ public class HsqldbUserDao implements UserDao {
 
     @Override
     public User create(User user) throws DatabaseException {
-        Connection conn = connectionFactory.getConnection();
-
-        PreparedStatement ps;
         try {
-            ps = conn.prepareStatement("INSERT INTO users (firstname, lastname, dateofbirth) VALUES (?, ?, ?)");
+            Connection conn = connectionFactory.getConnection();
+            PreparedStatement ps =
+                    conn.prepareStatement("INSERT INTO users (firstname, lastname, dateofbirth)" +
+                            "VALUES (?, ?, ?)");
+
             ps.setString(1, user.getFirstName());
             ps.setString(2, user.getLastName());
             ps.setDate(3, convert(user.getDateOfBirth()));
@@ -35,11 +33,24 @@ public class HsqldbUserDao implements UserDao {
             if (rows != 1) {
                 throw new DatabaseException("Number of the inserted rows: " + rows);
             }
+
+            CallableStatement cs = conn.prepareCall("call IDENTITY()");
+            ResultSet rs = cs.executeQuery();
+
+            if (rs.next()) {
+                long id = rs.getLong(1);
+                user.setId(id);
+            }
+
+            rs.close();
+            cs.close();
+            ps.close();
+            conn.close();
+
+            return user;
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
-
-        return null;
     }
 
     @Override
