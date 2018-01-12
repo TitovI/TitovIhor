@@ -6,6 +6,7 @@ import knpz17.titov.db.UserDao;
 import knpz17.titov.exception.db.DatabaseException;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class HsqldbUserDao implements UserDao {
@@ -70,7 +71,27 @@ public class HsqldbUserDao implements UserDao {
 
     @Override
     public Collection<User> findAll() throws DatabaseException {
-        return null;
+        String SELECT_ALL_SQL = "SELECT id, firstname, lastname, dateofbirth FROM users";
+        try {
+            Collection<User> result = new ArrayList<>();
+            Connection c = connectionFactory.getConnection();
+            Statement s = c.createStatement();
+            ResultSet rs = s.executeQuery(SELECT_ALL_SQL);
+
+            while (rs.next()) {
+                User user = new User();
+                user.setId(new Long(rs.getLong(1)));
+                user.setFirstName(rs.getString(2));
+                user.setLastName(rs.getString(3));
+                user.setDateOfBirth(rs.getDate(4));
+                result.add(user);
+            }
+
+            return result;
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+
     }
 
     private Date convert(java.util.Date utilDate) {
