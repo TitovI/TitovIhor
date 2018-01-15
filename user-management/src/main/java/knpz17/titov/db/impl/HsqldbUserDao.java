@@ -14,21 +14,18 @@ public class HsqldbUserDao implements UserDao {
 
     private ConnectionFactory connectionFactory;
 
-    public HsqldbUserDao() {
-    }
-
     public HsqldbUserDao(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 
     @Override
     public User create(User user) throws DatabaseException {
-        try {
-            Connection conn = connectionFactory.getConnection();
-            PreparedStatement ps =
-                    conn.prepareStatement("INSERT INTO users (firstname, lastname, dateofbirth)" +
-                            "VALUES (?, ?, ?)");
-
+        try (
+                Connection conn = connectionFactory.getConnection();
+                PreparedStatement ps =
+                        conn.prepareStatement("INSERT INTO users (firstname, lastname, dateofbirth)" +
+                                "VALUES (?, ?, ?)");
+        ) {
             ps.setString(1, user.getFirstName());
             ps.setString(2, user.getLastName());
             ps.setDate(3, convert(user.getDateOfBirth()));
@@ -39,18 +36,15 @@ public class HsqldbUserDao implements UserDao {
                 throw new DatabaseException("Number of the inserted rows: " + rows);
             }
 
-            CallableStatement cs = conn.prepareCall("call IDENTITY()");
-            ResultSet rs = cs.executeQuery();
-
-            if (rs.next()) {
-                long id = rs.getLong(1);
-                user.setId(id);
+            try (
+                    CallableStatement cs = conn.prepareCall("call IDENTITY()");
+                    ResultSet rs = cs.executeQuery()
+            ) {
+                if (rs.next()) {
+                    long id = rs.getLong(1);
+                    user.setId(id);
+                }
             }
-
-            rs.close();
-            cs.close();
-            ps.close();
-            conn.close();
 
             return user;
         } catch (SQLException e) {
@@ -60,20 +54,18 @@ public class HsqldbUserDao implements UserDao {
 
     @Override
     public void update(User user) throws DatabaseException {
-
+        //todo
     }
 
     @Override
     public void delete(User user) throws DatabaseException {
         String DELETE_SQL = "DELETE FROM users WHERE id = ?";
-        try {
-            Connection c = connectionFactory.getConnection();
-            PreparedStatement ps = c.prepareStatement(DELETE_SQL);
+        try (
+                Connection c = connectionFactory.getConnection();
+                PreparedStatement ps = c.prepareStatement(DELETE_SQL)
+        ) {
             ps.setLong(1, user.getId());
             ps.executeUpdate();
-
-            ps.close();
-            c.close();
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -82,61 +74,39 @@ public class HsqldbUserDao implements UserDao {
     @Override
     public User find(Long id) throws DatabaseException {
         String SELECT_BY_ID_SQL = "SELECT id, firstname, lastname, dateofbirth FROM users WHERE id = ?";
-        Connection c = null;
-        PreparedStatement ps = null;
-        try {
-            c = connectionFactory.getConnection();
-            ps = c.prepareStatement(SELECT_BY_ID_SQL);
+        try (
+                Connection c = connectionFactory.getConnection();
+                PreparedStatement ps = c.prepareStatement(SELECT_BY_ID_SQL);
+        ) {
             ps.setLong(1, id);
-            ResultSet rs = ps.executeQuery();
-            try {
+            try (ResultSet rs = ps.executeQuery();) {
                 if (rs.next()) {
                     return extractUser(rs);
                 } else {
                     throw new UserNotFoundException(id);
                 }
-            } finally {
-                rs.close();
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    throw new DatabaseException(e);
-                }
-            }
-
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    throw new DatabaseException(e);
-                }
-            }
         }
     }
 
     @Override
     public Collection<User> findAll() throws DatabaseException {
         String SELECT_ALL_SQL = "SELECT id, firstname, lastname, dateofbirth FROM users";
-        try {
-            Collection<User> result = new ArrayList<>();
-            Connection c = connectionFactory.getConnection();
-            Statement s = c.createStatement();
-            ResultSet rs = s.executeQuery(SELECT_ALL_SQL);
-
+        Collection<User> result = new ArrayList<>();
+        try (
+                Connection c = connectionFactory.getConnection();
+                Statement s = c.createStatement();
+                ResultSet rs = s.executeQuery(SELECT_ALL_SQL);
+        ) {
             while (rs.next()) {
                 result.add(extractUser(rs));
             }
-
-            return result;
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
-
+        return result;
     }
 
     @Override
